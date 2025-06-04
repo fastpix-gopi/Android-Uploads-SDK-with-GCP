@@ -1,0 +1,122 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout>
+
+    <RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+        xmlns:app="http://schemas.android.com/apk/res-auto"
+        xmlns:tools="http://schemas.android.com/tools"
+        android:id="@+id/main"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        tools:context=".PushVideoActivity">
+
+
+        <RelativeLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_above="@id/upload_video"
+            android:layout_centerInParent="true">
+
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/progress_indicator"
+                android:layout_width="wrap_content"
+                android:indeterminate="false"
+                app:trackThickness="15dp"
+                android:layout_height="wrap_content"
+                app:indicatorSize="200dp" />
+
+            <TextView
+                android:id="@+id/text_progress"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_centerInParent="true"
+                android:textAlignment="center"
+                android:text="Preparing..\nPlease wait"
+                android:textColor="@android:color/holo_blue_dark"
+                android:textSize="16sp" />
+
+        </RelativeLayout>
+
+
+        <Button
+            android:id="@+id/upload_video"
+            android:visibility="gone"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_centerInParent="true"
+            android:layout_marginHorizontal="20dp"
+            android:layout_marginTop="30dp"
+            android:text="Upload Video" />
+
+
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:orientation="vertical"
+            android:layout_marginTop="50dp"
+            android:layout_height="wrap_content">
+
+            <TextView
+                android:id="@+id/chunk_size"
+                android:textStyle="bold"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/total_chunks"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/file_size_in_bytes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/chunk_currently_uploading"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+            <TextView
+                android:id="@+id/current_chunk_size_in_bytes"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"/>
+
+        </LinearLayout>
+
+        <LinearLayout
+            android:visibility="gone"
+            android:id="@+id/pause_resume_layout"
+            android:layout_alignParentBottom="true"
+            android:padding="20dp"
+            android:layout_marginBottom="50dp"
+            android:orientation="vertical"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
+
+
+            <Button
+                android:id="@+id/pause"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Pause" />
+
+            <Button
+                android:layout_marginTop="10dp"
+                android:id="@+id/resume"
+                android:enabled="false"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Resume" />
+
+            <Button
+                android:layout_marginTop="10dp"
+                android:id="@+id/abort"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Abort" />
+
+
+        </LinearLayout>
+
+    </RelativeLayout>
+
+</layout>
