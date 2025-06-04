@@ -1,24 +1,14 @@
 version = 1
 
 [[analyzers]]
-<<<<<<< HEAD
-=======
-name = "java"
-
-  [analyzers.meta]
-  runtime_version = "11"
-
-[[analyzers]]
->>>>>>> 64356ca32185728c84bbc48f2c422329d30152f6
 name = "kotlin"
 
   [analyzers.meta]
   runtime_version = "1.8"
-<<<<<<< HEAD
-  language_version = "1.9"
-
-[[transformers]]
-name = "ktlint"
-=======
   language_version = "1.7"
->>>>>>> 64356ca32185728c84bbc48f2c422329d30152f6
+
+[[analyzers]]
+name = "java"
+
+  [analyzers.meta]
+  runtime_version = "11"
