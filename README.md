@@ -1,28 +1,24 @@
 # FastPixUploader SDK (Android)
 
-
 The **FastPixUploader SDK** is a robust Android library designed for chunked file uploads using signed URLs. It simplifies large file uploads by splitting files into smaller chunks, ensuring smooth and reliable transfers with built-in retry and progress tracking mechanisms.
-  
----  
 
-## Features:
+# Features:
 
-- Chunked uploads for large files
-- Resumable uploads
-- Customizable chunk size and retry strategy
-- Upload lifecycle callbacks
-- Network state awareness
-- Pause, resume and abort support
+- **Chunking:** Files are automatically split into chunks (configurable, default size is 16MB/chunk).
+- **Pause and Resume:** Allows temporarily pausing the upload and resuming after a while.
+- **Retry:** Uploads might fail due to temporary network failures. Individual chunks are retried for 5 times with exponential backoff to recover automatically from such failures.
+- **Lifecycle Event Listeners:** Listen to various upload lifecycle events to provide real-time feedback to users.
+- **Error Handling and Reporting:** Comprehensive error handling to manage upload failures gracefully and inform users of issues.
+- **Customizability:** Developers can customize the chunk size and retry attempts based on their specific needs and network conditions.
 
----  
+# Prerequisites:
 
-## Prerequisites:
-
+## Getting started with FastPix:
 - Android 5.0 (API 21) or above
 - Kotlin project (Java-compatible via interfaces)
-- A `File` and a `signed upload URL`. [How to get a Singed Url?](https://docs.fastpix.io/docs/get-started-in-5-minutes#step-2-get-an-api-access-token-from-the-dashboard)
-
----  
+- To get started with SDK, you will need a signed URL.
+- To make API requests, you'll need a valid **Access Token** and **Secret Key**. See the [Basic Authentication Guide](https://docs.fastpix.io/docs/basic-authentication) for details on retrieving these credentials.
+- Once you have your credentials, use the [Upload media from device](https://docs.fastpix.io/reference/direct-upload-video-media) API to generate a signed URL for uploading media.
 
 ## Installation:
 
@@ -35,9 +31,13 @@ dependencies {
     implementation("io.fastpix.upload:x.x.x") //latest version 1.0.1
 }
 ```
+## Basic Usage
 
-  
----  
+## Import
+
+```kotlin
+package io.fastpix.uploadsdk
+```  
 
 ## Integration
 
