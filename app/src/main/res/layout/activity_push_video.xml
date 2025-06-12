@@ -45,7 +45,7 @@
             android:layout_centerInParent="true"
             android:layout_marginHorizontal="20dp"
             android:layout_marginTop="30dp"
-            android:text="Upload Video" />
+            android:text="Upload File" />
 
 
         <LinearLayout

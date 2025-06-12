@@ -1,6 +1,8 @@
 package io.fastpix.uploadsdk
 
+import android.app.Activity
 import android.content.Context
+import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.provider.OpenableColumns
@@ -36,14 +38,16 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
 
     private lateinit var _binding: ActivityPushVideoBinding
     private var LOGGER = Logger.getLogger("com.fastpix.uploader")
-    private val galleryContract =
-        registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
-            uri?.let {
+    private val galleryContract = registerForActivityResult(
+        ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK) {
+            result.data?.data?.let { uri ->
                 _binding.textProgress.text = "Please wait!\nReading File.."
-                handleVideoUri(it)
+                handleVideoUri(uri)
             }
-
         }
+    }
 
     private val mainDispatcher = Dispatchers.Main
     private lateinit var sdk: FastPixUploadSdk
@@ -61,12 +65,18 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
             if (_binding.uploadVideo.text == "Upload Again") {
                 getSignedUrl()
             }
-            galleryContract.launch("video/*")
+            val intent = Intent(Intent.ACTION_GET_CONTENT).apply {
+                type = "*/*"
+                putExtra(Intent.EXTRA_MIME_TYPES, arrayOf("audio/*", "video/*"))
+                addCategory(Intent.CATEGORY_OPENABLE)
+            }
+            galleryContract.launch(Intent.createChooser(intent, "Select Audio or Video"))
         }
 
         _binding.pause.setOnClickListener {
 
             sdk.pauseUploading()
+            _binding.textProgress.text = "Paused"
             _binding.resume.isEnabled = true
             _binding.pause.isEnabled = false
         }
@@ -81,6 +91,8 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
 
         _binding.resume.setOnClickListener {
             sdk.resumeUploading()
+            _binding.textProgress.text = "Resume"
+
             _binding.pause.isEnabled = true
             _binding.resume.isEnabled = false
 
@@ -99,16 +111,14 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
     private fun callToFastPixSDK(file: File?) {
         try {
             _binding.chunkSize.text = "Chunk Size: $chunkSize"
-            sdk = FastPixUploadSdk.Builder(this)
-                .setFile(file)
-                .setSignedUrl(_signedUrl.orEmpty())
+            sdk = FastPixUploadSdk.Builder(this).setFile(file).setSignedUrl(_signedUrl.orEmpty())
                 .setChunkSize(chunkSize * 1024 * 1024) // Chunk Size in Byte
                 .callback(this) // Callback for handling the sdk events
                 .setRetryDelay(2000) // Retry Delay
                 .build()
             sdk.startUpload()
         } catch (ex: UploadExceptions) {
-            _binding.textProgress.text = ex.message
+//            _binding.textProgress.text = ex.message
         }
 
     }
@@ -122,8 +132,7 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
         val credentials = "${Constants.TOKEN_ID}:${Constants.SECRET_KEY}"
         val auth = "Basic ".plus(Base64.encodeToString(credentials.toByteArray(), Base64.NO_WRAP))
         val headers = mapOf(Pair("Authorization", auth), Pair("Content-Type", "application/json"))
-        OkHttpHelper.post(
-            "https://venus-v1.fastpix.dev/on-demand/uploads/v2",
+        OkHttpHelper.post("https://venus-v1.fastpix.dev/on-demand/upload",
             headers = headers,
             body = requestBody,
             callback = object : Callback {
@@ -142,7 +151,9 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
                             _binding.textProgress.text = "You can see\nprogress here"
                         }
                     } else {
-                        _binding.textProgress.text = "Something went to wrong! try again later"
+                        lifecycleScope.launch(mainDispatcher) {
+                            _binding.textProgress.text = "Something went to wrong! try again later"
+                        }
 
                     }
                 }
@@ -230,16 +241,12 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
 
     override fun onError(error: String, timiMillis: Long) {
         lifecycleScope.launch(mainDispatcher) {
-            _binding.textProgress.text = "$error $timiMillis"
+//            _binding.textProgress.text = "$error $timiMillis"
         }
     }
 
     override fun onNetworkStateChange(isOnline: Boolean) {
         // Handle Network State
-        if (isOnline) {
-            _binding.pause.isEnabled = true
-            _binding.resume.isEnabled = false
-        }
     }
 
     override fun onUploadInit() {
@@ -260,10 +267,7 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
     }
 
     override fun onChunkHandled(
-        totalChunks: Int,
-        filSizeInBytes: Long,
-        currentChunk: Int,
-        currentChunkSizeInBytes: Long
+        totalChunks: Int, filSizeInBytes: Long, currentChunk: Int, currentChunkSizeInBytes: Long
     ) {
         lifecycleScope.launch(mainDispatcher) {
             _binding.totalChunks.text = "Total Chunks: $totalChunks"
@@ -275,9 +279,7 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
     }
 
     override fun onChunkUploadingFailed(
-        failedChunkRetries: Int,
-        chunkCount: Int,
-        currentChunkSize: Long
+        failedChunkRetries: Int, chunkCount: Int, currentChunkSize: Long
     ) {
         lifecycleScope.launch(mainDispatcher) {
             _binding.textProgress.text =
@@ -296,6 +298,13 @@ class PushVideoActivity : AppCompatActivity(), FastPixUploadCallbacks {
         lifecycleScope.launch(mainDispatcher) {
             delay(1000)
             _binding.textProgress.text = "Resume"
+        }
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        lifecycleScope.launch(mainDispatcher) {
+            _binding.abort.performClick()
         }
     }
 }

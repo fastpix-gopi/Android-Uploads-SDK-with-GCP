@@ -47,6 +47,7 @@ class FastPixUploadSdk private constructor(
     private var uploadCall: Call? = null // Api call reference for uploading
     private val okHttpClient: OkHttpClient = createOkHttpClient() // Api Client
     private val maxDelayMs: Long = 10000
+    private val retryHelper = RetryHelper()
 
 
     /**
@@ -187,6 +188,10 @@ class FastPixUploadSdk private constructor(
                             handleChunkUploadFailure(response.message)
                             Log.e("statusCode", "yes");
                         } else {
+                            if (retryHelper != null) {
+                                retryHelper.cancel()
+                            }
+                            failedChunkRetries = 0
                             Log.e("statusCode", "No");
                             chunkCount++
                             successiveChunkCount++
@@ -207,7 +212,7 @@ class FastPixUploadSdk private constructor(
                 }
             })
         } catch (ex: Exception) {
-            handleChunkUploadFailure(ex.message.orEmpty())
+//            handleChunkUploadFailure(ex.message.orEmpty())
         }
     }
 
@@ -261,7 +266,7 @@ class FastPixUploadSdk private constructor(
             "timeStamp",
             Calendar.getInstance().time.toString() + " " + brackOff + " " + failedChunkRetries
         )
-        RetryHelper().runAfterDelay(brackOff) {
+        retryHelper.runAfterDelay(brackOff) {
             failedChunkRetries++
             callback?.onChunkUploadingFailed(
                 failedChunkRetries, chunkCount, getCurrentChunkSize()
@@ -308,7 +313,6 @@ class FastPixUploadSdk private constructor(
         isOffline = false
         isPause = false
         isAborted = false
-        failedChunkRetries = 0
     }
 
     var isFirstTime = true
